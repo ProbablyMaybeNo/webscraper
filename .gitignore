@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+data/images/*.jpg
+data/images/*.png
+data/images/*.webp
+data/*.db
+node_modules/
+dist/
+.DS_Store
+*.log
