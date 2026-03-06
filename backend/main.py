@@ -16,17 +16,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
-
-# Serve downloaded images
-images_dir = Path(__file__).parent.parent / "data" / "images"
-images_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/images", StaticFiles(directory=str(images_dir)), name="images")
-
-# Serve frontend dist if present
-frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
-if frontend_dist.exists():
-    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
+# Health check — must be registered before StaticFiles catch-all
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.on_event("startup")
@@ -34,6 +27,14 @@ def on_startup():
     init_db()
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+app.include_router(router)
+
+# Serve downloaded images
+images_dir = Path(__file__).parent.parent / "data" / "images"
+images_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/images", StaticFiles(directory=str(images_dir)), name="images")
+
+# Serve frontend dist (must be last — it's a catch-all)
+frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
